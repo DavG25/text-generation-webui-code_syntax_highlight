@@ -99,7 +99,7 @@ def ui():
         # Settings warning message and accordion style
         gr.HTML(value=f'''
           <style> {css_accordion} </style>
-          <p class="settings-warning" style="margin-bottom: 0;">Please wait for text generation to end before changing settings</p>
+          <p class="settings-warning">Please wait for text generation to end before changing settings</p>
         ''')
         # Setting: activate
         activate = gr.Checkbox(value=params['activate'], label='Enable syntax highlighting of code snippets')
