@@ -91,8 +91,8 @@ def ui():
           <style id="hljs-theme-dark" media="not all"> {css_theme_dark} </style>
           <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
         ''', visible=False)
-        # Use a dummy label as output to avoid Gradio throwing a JavaScript TypeError in the browser console when calling 'forEach()' on the undefined 'outputs' value
-        interface.load(None, None, gr.Label(visible=False), _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
+        # Inject JS
+        interface.load(None, None, None, _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
 
     # Display extension settings in the Gradio UI
     with gr.Accordion('Code Syntax Highlight - Settings', elem_id='code-syntax-highlight_accordion', open=True):
@@ -114,5 +114,5 @@ def ui():
         with gr.Row():
             gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')
             check_for_updates = gr.Button('Check for updates')
-            # Same as the interface, we're using a dummy output to prevent the JavaScript TypeError
-            check_for_updates.click(None, None, gr.Label(visible=False), _js=f'() => {{{js_extension_updater}}}')
+            # Run JS on button click
+            check_for_updates.click(None, None, None, _js=f'() => {{{js_extension_updater}}}')
