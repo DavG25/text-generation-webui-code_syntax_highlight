@@ -96,7 +96,7 @@ const textGenerationIndicatorFinder = setInterval(() => {
  *
  * We only enable one theme by setting the media attribute to 'all'
  */
-const gradioAppContainer = document.querySelectorAll('[class^=\'gradio\'].app, [class*=\'gradio\'].app')[0];
+const gradioAppContainer = document.body;
 
 // Enable specified theme or get current Gradio theme
 function updateTheme() {
