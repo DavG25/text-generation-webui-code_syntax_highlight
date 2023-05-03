@@ -25,7 +25,7 @@ let isGeneratingText = false;
  * not applying after they are changed when text is being generated)
  *
  * Not a fan of using this method to get the generation status, but I'm not aware of any
- * other way, it also not possible to detect text generated with "Impersonate" using this
+ * other way, it also not possible to detect text generated with 'Impersonate' using this
  *
  * We could use a MutationObserver on the whole body to detect any class changes and then
  * check for the 'generating' class, but that would impact the performance too much
@@ -69,7 +69,7 @@ const textGenerationObserver = new MutationObserver((mutations) => {
 });
 
 // Try to find the text generation indicator and hook the MutationObserver to it once found
-// Using this method we can't detect if text is generating with "Impersonate"
+// Using this method we can't detect if text is generating with 'Impersonate'
 const textGenerationIndicatorFinder = setInterval(() => {
   const textGenerationIndicator = document.querySelector('div.app [id=\'main\'] div[class*=\'generating\']');
   if (textGenerationIndicator) {
@@ -91,8 +91,8 @@ const textGenerationIndicatorFinder = setInterval(() => {
 /*
  * Update highlight.js CSS theme based on current Gradio theme
  *
- * Both themes are present in the page as separate styles with
- * the media attribute set to 'not all' to keep them disabled
+ * Both highlight.js themes are present in the page as separate styles
+ * with the media attribute set to 'not all' to keep them disabled
  *
  * We only enable one theme by setting the media attribute to 'all'
  */
