@@ -96,11 +96,12 @@ const textGenerationIndicatorFinder = setInterval(() => {
  *
  * We only enable one theme by setting the media attribute to 'all'
  */
-const gradioAppContainer = document.body;
+const gradioBody = document.body;
+const gradioContainer = document.querySelector('[class^=\'gradio\'].app, [class*=\'gradio\'].app');
 
 // Enable specified theme or get current Gradio theme
 function updateTheme() {
-  const theme = gradioAppContainer.classList.contains('dark') ? 'dark' : 'light';
+  const theme = gradioBody?.classList.contains('dark') || gradioContainer?.classList.contains('dark') ? 'dark' : 'light';
   document.getElementById(`hljs-theme-${theme}`).setAttribute('media', 'all');
   // Disable opposite theme
   const themeToDisable = theme === 'light' ? 'dark' : 'light';
@@ -123,12 +124,14 @@ const themeObserver = new MutationObserver((mutations) => {
   });
 });
 function registerThemeObserver() {
-  themeObserver.observe(gradioAppContainer, {
+  const themeObserverOptions = {
     attributes: true,
     attributeFilter: ['class'],
     childList: false,
     subtree: false,
-  });
+  };
+  themeObserver.observe(gradioBody, themeObserverOptions);
+  themeObserver.observe(gradioContainer, themeObserverOptions);
 }
 function removeThemeObserver() {
   themeObserver.disconnect();
