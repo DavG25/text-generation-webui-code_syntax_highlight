@@ -7,25 +7,32 @@
     overflow: hidden !important;
 }
 /* Increase code block height if copy button doesn't fit */
-.hljs-copy-narrow code {
-    min-height: 42px;
+.hljs-copy-narrow-wrapper code {
+    min-height: 2rem;
+}
+.hljs-copy-narrow-wrapper .hljs-copy-button {
+    height: 100% !important;
+    max-height: 2rem;
+    /* margin-top: 0px !important; */ /* <- The top margin is handled dynamically by the script */
 }
 .hljs-copy-wrapper:hover .hljs-copy-button,
 .hljs-copy-button:focus,
 .hljs-copy-button[data-copied="true"] {
     transform: translateX(0) !important;
+    margin-right: 5px !important;
 }
 /* Hide button on inline code blocks */
-:not(pre) > button.hljs-copy-button {
+:not(pre) > .hljs-copy-button {
     display: none !important;
 }
-pre > button.hljs-copy-button {
+pre > .hljs-copy-button {
     display: block !important;
 }
 .hljs-copy-button {
     position: absolute !important;
     /* font-size: var(--button-small-text-size, 14px) !important; */ /* <- Use this when displaying text when copied */
-    font-size: 5px !important;
+    margin-top: 5px !important;
+    font-size: 0px !important;
     /* The following line makes the button only appear when hovering the code */
     transform: translateX(calc(100% + 1.125em)) !important;
     top: 1em !important;
