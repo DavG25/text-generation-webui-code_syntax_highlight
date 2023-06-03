@@ -8,11 +8,11 @@
 }
 /* Increase code block height if copy button doesn't fit */
 .hljs-copy-narrow-wrapper code {
-    min-height: 2rem;
+    min-height: 2rem !important;
 }
 .hljs-copy-narrow-wrapper .hljs-copy-button {
     height: 100% !important;
-    max-height: 2rem;
+    max-height: 2rem !important;
     /* margin-top: 0px !important; */ /* <- The top margin is handled dynamically by the script */
 }
 .hljs-copy-wrapper:hover .hljs-copy-button,
