@@ -1,8 +1,7 @@
 /* 
- * This is a modified version of the "GitHub Dark" highlight.js theme to work with Gradio
+ * This is a modified version of the 'GitHub Dark' highlight.js theme to work with Gradio
  * https://github.com/highlightjs/highlight.js/blob/main/src/styles/github-dark.css
  */
-
 .hljs {
     color: #c9d1d9 !important;
     /* background: #0d1117; */
