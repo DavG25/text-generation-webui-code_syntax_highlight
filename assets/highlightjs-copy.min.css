@@ -6,6 +6,10 @@
     position: relative !important;
     overflow: hidden !important;
 }
+/* Increase code block height if copy button doesn't fit */
+.hljs-copy-narrow code {
+    min-height: 42px;
+}
 .hljs-copy-wrapper:hover .hljs-copy-button,
 .hljs-copy-button:focus,
 .hljs-copy-button[data-copied="true"] {
@@ -35,9 +39,9 @@ pre > button.hljs-copy-button {
     transition: background-color 200ms ease, transform 200ms ease-out !important;
 }
 @media (prefers-reduced-motion) {
-  .hljs-copy-button {
-      transition: none !important;
-  }
+    .hljs-copy-button {
+        transition: none !important;
+    }
 }
 /* The check mark is handled in the respective highlight.js theme file */
 /* .hljs-copy-button[data-copied="true"] {
