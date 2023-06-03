@@ -49,16 +49,6 @@ def js_params_updater(paramName):
 
 # CSS for the accordion on the Gradio UI
 css_accordion = '''
-  #code-syntax-highlight_accordion > div {
-    gap: var(--spacing-lg, 8px) !important;
-  }
-  #code-syntax-highlight_accordion .form {
-    margin-bottom: var(--spacing-lg, 8px) !important;
-  }
-  #code-syntax-highlight_accordion.disabled .form {
-    opacity: 0.5;
-    pointer-events: none;
-  }
   #code-syntax-highlight_accordion p.settings-warning {
     display: none;
   }
@@ -66,6 +56,10 @@ css_accordion = '''
     display: block;
     color: var(--block-info-text-color, inherit);
     margin-bottom: 0;
+  }
+  #code-syntax-highlight_accordion.disabled .form {
+    opacity: 0.5;
+    pointer-events: none;
   }
   #code-syntax-highlight_accordion p.version-label {
     margin: 0;
