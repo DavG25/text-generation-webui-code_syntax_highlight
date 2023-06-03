@@ -3,53 +3,63 @@
  * https://raw.githubusercontent.com/arronhunt/highlightjs-copy/master/dist/highlightjs-copy.min.css
  */
 .hljs-copy-wrapper {
-    position: relative !important;
-    overflow: hidden !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
+
 /* Increase code block height if copy button doesn't fit */
 .hljs-copy-narrow-wrapper code {
-    min-height: 2rem !important;
+  min-height: 2rem !important;
 }
+
 .hljs-copy-narrow-wrapper .hljs-copy-button {
-    height: 100% !important;
-    max-height: 2rem !important;
-    /* margin-top: 0px !important; */ /* <- The top margin is handled dynamically by the script */
+  height: 100% !important;
+  max-height: 2rem !important;
+  /* The top margin is handled dynamically by the script */
+  /* margin-top: 0px !important; */
 }
+
 .hljs-copy-wrapper:hover .hljs-copy-button,
 .hljs-copy-button:focus,
 .hljs-copy-button[data-copied="true"] {
-    transform: translateX(0) !important;
-    margin-right: 5px !important;
+  transform: translateX(0) !important;
+  margin-right: 5px !important;
 }
+
 /* Hide button on inline code blocks */
-:not(pre) > .hljs-copy-button {
-    display: none !important;
+:not(pre)>.hljs-copy-button {
+  display: none !important;
 }
-pre > .hljs-copy-button {
-    display: block !important;
+
+pre>.hljs-copy-button {
+  display: block !important;
 }
+
 .hljs-copy-button {
-    position: absolute !important;
-    /* font-size: var(--button-small-text-size, 14px) !important; */ /* <- Use this when displaying text when copied */
-    margin-top: 5px !important;
-    font-size: 0px !important;
-    /* The following line makes the button only appear when hovering the code */
-    transform: translateX(calc(100% + 1.125em)) !important;
-    top: 1em !important;
-    right: 1em !important;
-    width: 2rem !important;
-    height: 2rem !important;
-    text-indent: -9999px !important;
-    border-radius: 0.25rem !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    transition: background-color 200ms ease, transform 200ms ease-out !important;
+  position: absolute !important;
+  /* Use this when displaying text when copied */
+  /* font-size: var(--button-small-text-size, 14px) !important; */
+  margin-top: 5px !important;
+  font-size: 0px !important;
+  /* The following line makes the button only appear when hovering the code */
+  transform: translateX(calc(100% + 1.125em)) !important;
+  top: 1em !important;
+  right: 1em !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  text-indent: -9999px !important;
+  border-radius: 0.25rem !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: background-color 200ms ease, transform 200ms ease-out !important;
 }
+
 @media (prefers-reduced-motion) {
-    .hljs-copy-button {
-        transition: none !important;
-    }
+  .hljs-copy-button {
+    transition: none !important;
+  }
 }
+
 /* The check mark is handled in the respective highlight.js theme file */
 /* .hljs-copy-button[data-copied="true"] {
     text-indent: 0 !important;
@@ -59,6 +69,7 @@ pre > .hljs-copy-button {
     padding-left: 0.35rem !important;
     padding-right: 0.20rem !important;
 } */
+
 /* This is instead handled by the script via inline CSS */
 /* .hljs-copy-alert {
     clip: rect(0 0 0 0) !important;
