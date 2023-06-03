@@ -33,7 +33,7 @@ params = {
 # JS to check for extension's updates
 js_extension_updater = f'''
   const extensionInfo = {json.dumps(extension_info)};
-  if (confirm('Open Code Syntax Highlight GitHub page?')) window.open(extensionInfo.gitUrl + '/tree/' + extensionInfo.gitBranch, '_blank');
+  if (confirm('Open the GitHub page of Code Syntax Highlight?')) window.open(extensionInfo.gitUrl + '/releases/latest', '_blank');
 '''
 
 # JS to update the specified param so that JS modules can access it
