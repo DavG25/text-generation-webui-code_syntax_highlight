@@ -13,7 +13,7 @@ with open(assets_dir / 'arrive.min.js', 'r') as f:
     js_modules = f.read()
 with open(assets_dir / 'highlight.min.js', 'r') as f:
     js_modules += '\n' + f.read()
-with open(assets_dir / 'highlightjs-copy.min.js', 'r') as f:
+with open(assets_dir / 'highlightjs-copy.js', 'r') as f:
     js_modules += '\n' + f.read()
 with open(assets_dir / 'main.js', 'r') as f:
     js_modules += '\n' + f.read()
@@ -21,7 +21,7 @@ with open(assets_dir / 'github.css', 'r') as f:
     css_theme_light = f.read()
 with open(assets_dir / 'github-dark.css', 'r') as f:
     css_theme_dark = f.read()
-with open(assets_dir / 'highlightjs-copy.min.css', 'r') as f:
+with open(assets_dir / 'highlightjs-copy.css', 'r') as f:
     css_copy_button = '\n' + f.read()
 # Initialize extension information (like the current version)
 with open(assets_dir / 'extension.json', 'r') as f:
