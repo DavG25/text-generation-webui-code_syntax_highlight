@@ -6,8 +6,8 @@ import gradio as gr
 #   arrive.js 2.4.1 - https://raw.githubusercontent.com/uzairfarooq/arrive/cfabddbd2633a866742e98c88ba5e4b75cb5257b/minified/arrive.min.js
 #     [SHA256 - 5971DE670AEF1D6F90A63E6ED8D095CA22F95C455FFC0CEB60BE62E30E1A4473]
 #
-#   highlight.js 11.7.0 - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js
-#     [SHA256 - 9F19CEBC1D4441AE1F0FFC696A42628B9F865FE5D99DEDA1F1E8CD5BEC878888]
+#   highlight.js 11.8.0 - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js
+#     [SHA256 - 4499FF936D4FD562ADCA5A5CBE512DC19EB80942EEE8618DAFBCEBC4F7974BDB]
 assets_dir = Path(__file__).resolve().parent / 'assets'
 with open(assets_dir / 'arrive.min.js', 'r') as f:
     js_modules = f.read()
