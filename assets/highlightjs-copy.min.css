@@ -1,0 +1,60 @@
+/* 
+ * This is a modified version of the 'highlightjs-copy' CSS theme to work with Gradio
+ * https://raw.githubusercontent.com/arronhunt/highlightjs-copy/master/dist/highlightjs-copy.min.css
+ */
+.hljs-copy-wrapper {
+    position: relative !important;
+    overflow: hidden !important;
+}
+.hljs-copy-wrapper:hover .hljs-copy-button,
+.hljs-copy-button:focus,
+.hljs-copy-button[data-copied="true"] {
+    transform: translateX(0) !important;
+}
+/* Hide button on inline code blocks */
+:not(pre) > button.hljs-copy-button {
+    display: none !important;
+}
+pre > button.hljs-copy-button {
+    display: block !important;
+}
+.hljs-copy-button {
+    position: absolute !important;
+    /* font-size: var(--button-small-text-size, 14px) !important; */ /* <- Use this when displaying text when copied */
+    font-size: 5px !important;
+    /* The following line makes the button only appear when hovering the code */
+    transform: translateX(calc(100% + 1.125em)) !important;
+    top: 1em !important;
+    right: 1em !important;
+    width: 2rem !important;
+    height: 2rem !important;
+    text-indent: -9999px !important;
+    border-radius: 0.25rem !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    transition: background-color 200ms ease, transform 200ms ease-out !important;
+}
+.hljs-copy-button[data-copied="true"] {
+    /* text-indent: 0 !important;
+    background-image: none !important;
+    width: auto !important;
+    background-image: none !important;
+    padding-left: 0.35rem !important;
+    padding-right: 0.20rem !important; */
+    /* The check mark is handled in the respective highlight.js theme file */
+}
+@media (prefers-reduced-motion) {
+    .hljs-copy-button {
+        transition: none !important;
+    }
+}
+.hljs-copy-alert {
+    /* clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    white-space: nowrap !important;
+    width: 1px !important; */
+    /* This is instead handled by the script via inline CSS */
+}
