@@ -7,7 +7,7 @@
 - Uses highlight.js with the [GitHub theme](https://highlightjs.org/static/demo/#:~:text=GitHub%20Dark)
 - Supports [common](https://highlightjs.org/download/#:~:text=common) programming languages
 - Can also highlight inline code snippets
-- Provides an optional button on each code snippet to copy the code
+- Provides an optional button in each code snippet to copy code to the clipboard
 - Works in all interface modes: default, notebook, and chat
 - Automatically switches between light and dark themes to match the Web UI theme
 - Has a performance mode for minimal CPU usage
@@ -17,13 +17,13 @@
 ## Installation
 The extension can be installed by cloning this repository inside the `../text-generation-webui/extensions` folder:
 ```
-cd PATH_TO_text-generation-webui/extensions
+cd text-generation-webui/extensions
 ```
 ```
 git clone https://github.com/DavG25/text-generation-webui-code_syntax_highlight code_syntax_highlight
 ```
 
-It also possible to install the extension by directly downloading the latest version from the [releases page](https://github.com/DavG25/text-generation-webui-code_syntax_highlight/releases/latest) and extracting the ZIP archive inside the `../text-generation-webui/extensions` folder
+It's also possible to install the extension by directly downloading the latest version from the [releases page](https://github.com/DavG25/text-generation-webui-code_syntax_highlight/releases/latest) and extracting the ZIP archive inside the `../text-generation-webui/extensions` folder
 
 <br>
 
@@ -32,7 +32,7 @@ To check for updates, simply compare the currently installed extension version i
 
 If the available version is higher than the installed one, run the following command:
 ```
-cd PATH_TO_text-generation-webui/extensions
+cd text-generation-webui/extensions
 ```
 ```
 git pull
