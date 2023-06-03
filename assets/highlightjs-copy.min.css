@@ -34,27 +34,27 @@ pre > button.hljs-copy-button {
     background-position: center !important;
     transition: background-color 200ms ease, transform 200ms ease-out !important;
 }
-.hljs-copy-button[data-copied="true"] {
-    /* text-indent: 0 !important;
+@media (prefers-reduced-motion) {
+  .hljs-copy-button {
+      transition: none !important;
+  }
+}
+/* The check mark is handled in the respective highlight.js theme file */
+/* .hljs-copy-button[data-copied="true"] {
+    text-indent: 0 !important;
     background-image: none !important;
     width: auto !important;
     background-image: none !important;
     padding-left: 0.35rem !important;
-    padding-right: 0.20rem !important; */
-    /* The check mark is handled in the respective highlight.js theme file */
-}
-@media (prefers-reduced-motion) {
-    .hljs-copy-button {
-        transition: none !important;
-    }
-}
-.hljs-copy-alert {
-    /* clip: rect(0 0 0 0) !important;
+    padding-right: 0.20rem !important;
+} */
+/* This is instead handled by the script via inline CSS */
+/* .hljs-copy-alert {
+    clip: rect(0 0 0 0) !important;
     clip-path: inset(50%) !important;
     height: 1px !important;
     overflow: hidden !important;
     position: absolute !important;
     white-space: nowrap !important;
-    width: 1px !important; */
-    /* This is instead handled by the script via inline CSS */
-}
+    width: 1px !important;
+} */
