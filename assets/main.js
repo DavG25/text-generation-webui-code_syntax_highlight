@@ -7,6 +7,9 @@
  * inline_highlight: if set to true, code blocks without the <pre> tag (inline
  * code blocks) will also be highlighted
  *
+ * copy_button: if set to true, a button to copy the code inside each code
+ * block will be shown
+ *
  * performance_mode: if set to true, the extension will wait until text generation
  * ends before highlighting the code on the page to use less resources
  *
@@ -89,6 +92,43 @@ const textGenerationIndicatorFinder = setInterval(() => {
 }, 200);
 
 /*
+ * Add copy button to code blocks
+ *
+ * Only full code blocks (not inline ones) will show the copy button
+ */
+let isCopyButtonPluginLoaded = false;
+const copyButtonPlugin = new CopyButtonPlugin({
+  lang: 'en',
+});
+
+// Add or remove the hljs copy button plugin based on the current params
+function updateCopyButtonPluginStatus() {
+  if (params.copy_button === true && !isCopyButtonPluginLoaded) {
+    hljs.addPlugin(copyButtonPlugin);
+    document.getElementById('hljs-copy-button').setAttribute('media', 'all');
+    isCopyButtonPluginLoaded = true;
+  } else if (params.copy_button === false && isCopyButtonPluginLoaded) {
+    hljs.removePlugin(copyButtonPlugin);
+    document.getElementById('hljs-copy-button').setAttribute('media', 'not all');
+    isCopyButtonPluginLoaded = false;
+  }
+}
+
+// Remove copy button associated with the provided code block element
+function removeCopyButtonFromCodeElement(codeElement) {
+  const preWrapperElement = codeElement.parentElement;
+  Array.from(preWrapperElement.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
+    copyCodeButton.remove();
+  });
+}
+// Remove every copy button from all code blocks
+function removeAllCopyButtons() {
+  Array.from(document.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
+    copyCodeButton.remove();
+  });
+}
+
+/*
  * Update highlight.js CSS theme based on current Gradio theme
  *
  * Both highlight.js themes are present in the page as separate styles
@@ -143,11 +183,17 @@ function highlightCode({ inlineHighlight = params.inline_highlight, codeElement 
   if (params.activate === false) return;
   // Configure highlight.js to also highlight inline code blocks if specified
   const cssSelector = inlineHighlight === true ? 'code' : 'pre code';
+  // Apply config to highlight.js
   hljs.configure({
     cssSelector,
     ignoreUnescapedHTML: true,
     throwUnescapedHTML: false,
   });
+  // Remove copy button(s) before applying highlight to prevent duplicate buttons
+  if (params.copy_button === true) {
+    if (!codeElement) removeAllCopyButtons();
+    else removeCopyButtonFromCodeElement(codeElement);
+  }
   // Highlight just the provided code element or every code element in the DOM
   if (!codeElement) hljs.highlightAll();
   else hljs.highlightElement(codeElement);
@@ -210,12 +256,14 @@ function setActivationStatus(isActive) {
   if (isActive) {
     // Extension is enabled
     updateTheme();
+    updateCopyButtonPluginStatus();
     registerThemeObserver();
     registerCodeObserver();
     highlightCode();
   } else {
     // Extension is disabled
     disableAllThemes();
+    removeAllCopyButtons();
     removeThemeObserver();
     removeCodeObserver();
     removeHighlight();
@@ -246,6 +294,17 @@ function setParams(newParams) {
       } else {
         removeHighlight();
         highlightCode({ inlineHighlight: false });
+      }
+    }
+    // Trigger changes if code copy button status was changed
+    if (oldParams.copy_button !== newParams.copy_button) {
+      if (newParams.copy_button === true) {
+        removeHighlight();
+        updateCopyButtonPluginStatus();
+        highlightCode();
+      } else {
+        removeAllCopyButtons();
+        updateCopyButtonPluginStatus();
       }
     }
   }
