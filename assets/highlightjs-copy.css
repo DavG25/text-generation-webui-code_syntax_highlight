@@ -15,8 +15,6 @@
 .hljs-copy-narrow-wrapper .hljs-copy-button {
   height: 100% !important;
   max-height: 2rem !important;
-  /* The top margin is handled dynamically by the script */
-  /* margin-top: 0px !important; */
 }
 
 .hljs-copy-wrapper:hover .hljs-copy-button,
@@ -37,11 +35,8 @@ pre>.hljs-copy-button {
 
 .hljs-copy-button {
   position: absolute !important;
-  /* Use this when displaying text when copied */
-  /* font-size: var(--button-small-text-size, 14px) !important; */
   margin-top: 5px !important;
   font-size: 0px !important;
-  /* The following line makes the button only appear when hovering the code */
   transform: translateX(calc(100% + 1.125em)) !important;
   top: 1em !important;
   right: 1em !important;
@@ -59,24 +54,3 @@ pre>.hljs-copy-button {
     transition: none !important;
   }
 }
-
-/* The check mark is handled in the respective highlight.js theme file */
-/* .hljs-copy-button[data-copied="true"] {
-    text-indent: 0 !important;
-    background-image: none !important;
-    width: auto !important;
-    background-image: none !important;
-    padding-left: 0.35rem !important;
-    padding-right: 0.20rem !important;
-} */
-
-/* This is instead handled by the script via inline CSS */
-/* .hljs-copy-alert {
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    height: 1px !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    white-space: nowrap !important;
-    width: 1px !important;
-} */
