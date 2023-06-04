@@ -44,7 +44,7 @@ If the extension was installed by downloading the ZIP archive, delete the curren
 ## Configuration and persistent settings
 The extension can be enabled directly in the `Interface mode` tab inside the Web UI once installed
 
-To always keep the extension enabled, either load it using [command-line flags](https://github.com/oobabooga/text-generation-webui#basic-settings) or add it in the `settings.yaml` file in the `text-generation-webui` folder by adding the following lines:
+To automatically load the extension when starting the Web UI, either specify it in the `--extensions` [command-line flag](https://github.com/oobabooga/text-generation-webui#basic-settings) or add it in the `settings.yaml` file in the `../text-generation-webui` folder by adding the following lines:
 ```yaml
 default_extensions: 
 - code_syntax_highlight
