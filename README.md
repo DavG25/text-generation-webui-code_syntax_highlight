@@ -1,14 +1,15 @@
 # Code Syntax Highlight
 ### An extension for [oobabooga's text-generation-webui](https://github.com/oobabooga/text-generation-webui/) to highlight code snippets
 
-![preview-1](https://www.davg25.com/file/github-media/text-generation-webui-code_syntax_highlight/demo1.png)
+![code_syntax_highlight_extension-oobabooga-text-generation-webui](https://www.davg25.com/file/github-media/text-generation-webui-code_syntax_highlight/demo2.png)
 
 ## Features
 - Uses highlight.js with the [GitHub theme](https://highlightjs.org/static/demo/#:~:text=GitHub%20Dark)
 - Supports [common](https://highlightjs.org/download/#:~:text=common) programming languages
-- Works in all interface modes: default, notebook, chat, cai-chat and instruct
-- Switches automatically between light and dark theme
 - Can also highlight inline code snippets
+- Provides an optional button in each code snippet to copy code to the clipboard
+- Works in all interface modes: default, notebook, and chat
+- Automatically switches between light and dark themes to match the Web UI theme
 - Has a performance mode for minimal CPU usage
 
 <br>
@@ -16,13 +17,13 @@
 ## Installation
 The extension can be installed by cloning this repository inside the `../text-generation-webui/extensions` folder:
 ```
-cd PATH_TO_text-generation-webui/extensions
+cd text-generation-webui/extensions
 ```
 ```
 git clone https://github.com/DavG25/text-generation-webui-code_syntax_highlight code_syntax_highlight
 ```
 
-It also possible to install the extension by directly downloading the latest version from the [releases page](https://github.com/DavG25/text-generation-webui-code_syntax_highlight/releases/latest) and extracting the ZIP archive inside the `../text-generation-webui/extensions` folder
+It's also possible to install the extension by directly downloading the latest version from the [releases page](https://github.com/DavG25/text-generation-webui-code_syntax_highlight/releases/latest) and extracting the ZIP archive inside the `../text-generation-webui/extensions` folder
 
 <br>
 
@@ -31,7 +32,7 @@ To check for updates, simply compare the currently installed extension version i
 
 If the available version is higher than the installed one, run the following command:
 ```
-cd PATH_TO_text-generation-webui/extensions
+cd text-generation-webui/extensions
 ```
 ```
 git pull
@@ -43,7 +44,14 @@ If the extension was installed by downloading the ZIP archive, delete the curren
 ## Configuration and persistent settings
 The extension can be enabled directly in the `Interface mode` tab inside the Web UI once installed
 
-To always keep the extension enabled, either load it using [command-line flags](https://github.com/oobabooga/text-generation-webui#basic-settings) or add it in the `settings.json` file in the `text-generation-webui` folder by adding the following lines:
+To always keep the extension enabled, either load it using [command-line flags](https://github.com/oobabooga/text-generation-webui#basic-settings) or add it in the `settings.yaml` file in the `text-generation-webui` folder by adding the following lines:
+```yaml
+default_extensions: 
+- code_syntax_highlight
+chat_default_extensions:
+- code_syntax_highlight
+```
+Or if still using the old `settings.json` file:
 ```json
 "default_extensions": [
   "code_syntax_highlight"
@@ -55,11 +63,19 @@ To always keep the extension enabled, either load it using [command-line flags](
 
 <br>
 
-For settings to persist over Web UI restarts and reloads, add the following lines to the `settings.json` file:
+For settings to persist over Web UI restarts and reloads, add the following lines to the `settings.yaml` file:
 
+```yaml
+code_syntax_highlight-activate: true
+code_syntax_highlight-inline_highlight: false
+code_syntax_highlight-copy_button: false
+code_syntax_highlight-performance_mode: false
+```
+Or if still using the old `settings.json` file:
 ```json
 "code_syntax_highlight-activate": true,
 "code_syntax_highlight-inline_highlight": false,
+"code_syntax_highlight-copy_button": false,
 "code_syntax_highlight-performance_mode": false,
 ```
-Change the values according to the preferred settings using the `JSON` format
+Change the values (`true` / `false`) according to the preferred settings

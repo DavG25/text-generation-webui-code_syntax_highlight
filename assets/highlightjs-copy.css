@@ -1,0 +1,54 @@
+/* 
+ * This is a modified version of the 'highlightjs-copy' CSS theme to work with Gradio
+ * https://raw.githubusercontent.com/arronhunt/highlightjs-copy/master/dist/highlightjs-copy.min.css
+ */
+.hljs-copy-wrapper {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Increase code block height if copy button doesn't fit */
+.hljs-copy-narrow-wrapper code {
+  min-height: 2rem !important;
+}
+
+.hljs-copy-narrow-wrapper .hljs-copy-button {
+  height: 100% !important;
+  max-height: 2rem !important;
+}
+
+.hljs-copy-wrapper:hover .hljs-copy-button,
+.hljs-copy-button:focus,
+.hljs-copy-button[data-copied="true"] {
+  transform: translateX(0) !important;
+  margin-right: 5px !important;
+}
+
+/* Hide button on inline code blocks */
+:not(pre)>.hljs-copy-button {
+  display: none !important;
+}
+
+pre>.hljs-copy-button {
+  display: block !important;
+}
+
+.hljs-copy-button {
+  position: absolute !important;
+  margin-top: 5px !important;
+  font-size: 0px !important;
+  transform: translateX(calc(100% + 1.125em)) !important;
+  top: 1em !important;
+  right: 1em !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  text-indent: -9999px !important;
+  border-radius: 0.25rem !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: background-color 200ms ease, transform 200ms ease-out !important;
+}
+
+body.code-syntax-highlight--is-generating-text .hljs-copy-button {
+  transition: none !important;
+}

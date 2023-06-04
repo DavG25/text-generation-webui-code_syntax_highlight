@@ -6,12 +6,14 @@ import gradio as gr
 #   arrive.js 2.4.1 - https://raw.githubusercontent.com/uzairfarooq/arrive/cfabddbd2633a866742e98c88ba5e4b75cb5257b/minified/arrive.min.js
 #     [SHA256 - 5971DE670AEF1D6F90A63E6ED8D095CA22F95C455FFC0CEB60BE62E30E1A4473]
 #
-#   highlight.js 11.7.0 - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js
-#     [SHA256 - 9F19CEBC1D4441AE1F0FFC696A42628B9F865FE5D99DEDA1F1E8CD5BEC878888]
+#   highlight.js 11.8.0 - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js
+#     [SHA256 - 4499FF936D4FD562ADCA5A5CBE512DC19EB80942EEE8618DAFBCEBC4F7974BDB]
 assets_dir = Path(__file__).resolve().parent / 'assets'
 with open(assets_dir / 'arrive.min.js', 'r') as f:
     js_modules = f.read()
 with open(assets_dir / 'highlight.min.js', 'r') as f:
+    js_modules += '\n' + f.read()
+with open(assets_dir / 'highlightjs-copy.js', 'r') as f:
     js_modules += '\n' + f.read()
 with open(assets_dir / 'main.js', 'r') as f:
     js_modules += '\n' + f.read()
@@ -19,14 +21,17 @@ with open(assets_dir / 'github.css', 'r') as f:
     css_theme_light = f.read()
 with open(assets_dir / 'github-dark.css', 'r') as f:
     css_theme_dark = f.read()
+with open(assets_dir / 'highlightjs-copy.css', 'r') as f:
+    css_copy_button = f.read()
 # Initialize extension information (like the current version)
 with open(assets_dir / 'extension.json', 'r') as f:
     extension_info = json.load(f)
 
 # Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/Extensions.md#params-dictionary
 params = {
-    'activate': True,
+    'activate': True, # TODO: Separate activate from highlight, so for example we can still enable copy_button without the highlight
     'inline_highlight': False,
+    'copy_button': False,
     'performance_mode': False,
 }
 
@@ -83,6 +88,8 @@ def ui():
         gr.HTML(value=f'''
           <style id="hljs-theme-light" media="not all"> {css_theme_light} </style>
           <style id="hljs-theme-dark" media="not all"> {css_theme_dark} </style>
+          <style> button.hljs-copy-button {{ display: none; }} </style>
+          <style id="hljs-copy-button" media="not all"> {css_copy_button} </style>
           <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
         ''', visible=False)
         # Inject JS, the label is used to avoid a TypeError in older Gradio versions, see https://github.com/gradio-app/gradio/pull/3883
@@ -96,11 +103,14 @@ def ui():
           <p class="settings-warning">Please wait for text generation to end before changing settings</p>
         ''')
         # Setting: activate
-        activate = gr.Checkbox(value=params['activate'], label='Enable syntax highlighting of code snippets')
+        activate = gr.Checkbox(value=params['activate'], label='Enable extension and syntax highlighting of code snippets')
         activate.change(lambda x: params.update({'activate': x}), activate, _js=js_params_updater('activate'))
         # Setting: inline_highlight
         inline_highlight = gr.Checkbox(value=params['inline_highlight'], label='Highlight inline code snippets')
         inline_highlight.change(lambda x: params.update({'inline_highlight': x}), inline_highlight, _js=js_params_updater('inline_highlight'))
+        # Setting: copy_button
+        copy_button = gr.Checkbox(value=params['copy_button'], label='Show button to copy code inside code snippets')
+        copy_button.change(lambda x: params.update({'copy_button': x}), copy_button, _js=js_params_updater('copy_button'))
         # Setting: performance_mode
         performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
         performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
