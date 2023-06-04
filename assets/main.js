@@ -57,8 +57,13 @@ function enableSettingsAccordion() {
 // Update global 'isGeneratingText' var and trigger associated actions
 function setTextGenerationStatus(newGeneratingStatus) {
   isGeneratingText = newGeneratingStatus;
-  if (newGeneratingStatus) disableSettingsAccordion();
-  else enableSettingsAccordion();
+  if (newGeneratingStatus) {
+    document.body.classList.add('code-syntax-highlight--is-generating-text');
+    disableSettingsAccordion();
+  } else {
+    document.body.classList.remove('code-syntax-highlight--is-generating-text');
+    enableSettingsAccordion();
+  }
 }
 
 // Watch for changes in the text generation status
