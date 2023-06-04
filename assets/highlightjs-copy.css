@@ -49,8 +49,6 @@ pre>.hljs-copy-button {
   transition: background-color 200ms ease, transform 200ms ease-out !important;
 }
 
-@media (prefers-reduced-motion) {
-  .hljs-copy-button {
-    transition: none !important;
-  }
+body.code-syntax-highlight--is-generating-text .hljs-copy-button {
+  transition: none !important;
 }
