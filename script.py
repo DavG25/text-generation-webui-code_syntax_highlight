@@ -22,7 +22,7 @@ with open(assets_dir / 'github.css', 'r') as f:
 with open(assets_dir / 'github-dark.css', 'r') as f:
     css_theme_dark = f.read()
 with open(assets_dir / 'highlightjs-copy.css', 'r') as f:
-    css_copy_button = '\n' + f.read()
+    css_copy_button = f.read()
 # Initialize extension information (like the current version)
 with open(assets_dir / 'extension.json', 'r') as f:
     extension_info = json.load(f)
