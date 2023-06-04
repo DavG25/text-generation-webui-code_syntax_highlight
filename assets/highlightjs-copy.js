@@ -39,10 +39,10 @@ class CopyButtonPlugin {
     // Handle copy to clipboard on button click
     button.onclick = () => {
       if (!navigator.clipboard) {
-        // Some browsers (for example on Android) require an HTTPS connection
-        // for the clipboard function to work so this won't work on a local URL
-        // unless we use the Gradio HTTPS link with --share
-        // TODO: Warn user if copy fails after clicking the button
+        // Some browsers (for example on mobile devices) require an HTTPS
+        // connection for the clipboard function to work so this won't work
+        // on a local URL unless we use the Gradio HTTPS link with --share
+        alert('Unable to copy text: the clipboard feature could be disabled or the browser may require an HTTPS connection for it to work');
         return;
       }
 
