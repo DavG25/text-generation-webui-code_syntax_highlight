@@ -92,8 +92,7 @@ def ui():
           <style id="hljs-copy-button" media="not all"> {css_copy_button} </style>
           <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
         ''', visible=False)
-        # Inject JS, the label is used to avoid a TypeError in older Gradio versions, see https://github.com/gradio-app/gradio/pull/3883
-        interface.load(None, None, gr.Label(visible=False), _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
+        interface.load(None, None, None, _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
 
     # Display extension settings in the Gradio UI
     with gr.Accordion('Code Syntax Highlight - Settings', elem_id='code-syntax-highlight_accordion', open=True):
@@ -112,11 +111,10 @@ def ui():
         copy_button = gr.Checkbox(value=params['copy_button'], label='Show button to copy code inside code snippets')
         copy_button.change(lambda x: params.update({'copy_button': x}), copy_button, _js=js_params_updater('copy_button'))
         # Setting: performance_mode
-        performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
-        performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
+        #performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
+        #performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
         # Version info and update check button
         with gr.Row():
             gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')
             check_for_updates = gr.Button('Check for updates')
-            # Run JS on button click, the label is used to avoid a TypeError in older Gradio versions, see https://github.com/gradio-app/gradio/pull/3883
-            check_for_updates.click(None, None, gr.Label(visible=False), _js=f'() => {{{js_extension_updater}}}')
+            check_for_updates.click(None, None, None, _js=f'() => {{{js_extension_updater}}}')
