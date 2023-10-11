@@ -111,8 +111,8 @@ def ui():
         copy_button = gr.Checkbox(value=params['copy_button'], label='Show button to copy code inside code snippets')
         copy_button.change(lambda x: params.update({'copy_button': x}), copy_button, _js=js_params_updater('copy_button'))
         # Setting: performance_mode
-        performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
-        performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
+        #performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
+        #performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
         # Version info and update check button
         with gr.Row():
             gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')
