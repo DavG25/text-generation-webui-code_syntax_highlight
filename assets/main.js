@@ -278,13 +278,7 @@ function setActivationStatus(isActive) {
 // Once everything is ready, activate the extension
 setActivationStatus(params.activate);
 
-/*
- * Code Syntax Highlight params
- * We use the <code-syntax-highlight> element as a data proxy between Gradio and
- * this JS script, when changed are detected through the MutationObserver, we
- * updated the local params and trigger the associated changes
- *
- */
+// Update locally stored params
 function setParams(newParams) {
   // Params were changed, update local values to reflect changes
   const oldParams = structuredClone(params);
