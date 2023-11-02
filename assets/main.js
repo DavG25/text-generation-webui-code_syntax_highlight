@@ -17,22 +17,22 @@
 const dataProxy = document.getElementById('code-syntax-highlight');
 let params = JSON.parse(dataProxy.getAttribute('params'));
 
-// Define other global vars
+/*
+ * Detect the current text generation status by intercepting
+ * the WebSocket messages received by the Web UI
+ *
+ * We only parse the WebSocket message as JSON when we detect
+ * a 'process_starts' or 'process_completed' string inside of it
+ *
+ * This could cause the WebSocket message to be parsed if the inner content has either of those
+ * strings, but in that case the resulting generation status will still be the right one, as
+ * we detect it from the parsed message in the end
+ *
+ * Using this method will also intercept other loading operations,
+ * but that is a minor downside with no impact in this case
+ */
 let isGeneratingText = false;
 
-/*
- * Detect current text generation status
- *
- * We use this to detect when the webui is generating text, so we
- * can disable the accordion in the Gradio UI (this is to prevent settings
- * not applying after they are changed when text is being generated)
- *
- * Not a fan of using this method to get the generation status, but I'm not aware of any
- * other way, it also not possible to detect text generated with 'Impersonate' using this
- *
- * We could use a MutationObserver on the whole body to detect any class changes and then
- * check for the 'generating' class, but that would impact the performance too much
- */
 const settingsAccordion = document.getElementById('code-syntax-highlight_accordion');
 
 // Disable the settings menu and prevent any setting change
@@ -54,9 +54,10 @@ function enableSettingsAccordion() {
   settingsAccordion.unbindArrive('INPUT');
 }
 
-// Update global 'isGeneratingText' var and trigger associated actions
+// Update the global 'isGeneratingText' value and trigger related actions
 function setTextGenerationStatus(newGeneratingStatus) {
   isGeneratingText = newGeneratingStatus;
+  // Signal the generation status in CSS, this is used by UI components
   if (newGeneratingStatus) {
     document.body.classList.add('code-syntax-highlight--is-generating-text');
     disableSettingsAccordion();
@@ -66,35 +67,50 @@ function setTextGenerationStatus(newGeneratingStatus) {
   }
 }
 
-// Watch for changes in the text generation status
-const textGenerationObserver = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.attributeName === 'class') {
-      // Update generating status
-      setTextGenerationStatus(mutation.target.classList.contains('generating'));
-    }
-  });
-});
+// Intercept the WebSocket messages and update the text generation status accordingly
+let generationStatusChangeTimeout;
+function interceptWebSocket() {
+  // Find the WebSocket connection
+  const OriginalWebSocket = window.WebSocket;
 
-// Try to find the text generation indicator and hook the MutationObserver to it once found
-// Using this method we can't detect if text is generating with 'Impersonate'
-const textGenerationIndicatorFinder = setInterval(() => {
-  const textGenerationIndicator = document.querySelector('div.app [id=\'main\'] div[class*=\'generating\']');
-  if (textGenerationIndicator) {
-    // Only start to observe the text generation indicator after the first ever generation
-    // This is to make sure we're observing the right element
-    textGenerationObserver.observe(textGenerationIndicator, {
-      attributes: true,
-      attributeFilter: ['class'],
-      childList: false,
-      subtree: false,
+  window.WebSocket = function construct(url, protocols) {
+    const ws = new OriginalWebSocket(url, protocols);
+
+    // Listen for incoming messages
+    ws.addEventListener('message', (event) => {
+      try {
+        // Method 1: Reliable and at the same time CPU intensive
+        /*
+        const status = JSON.parse(event.data).msg;
+        if (status == 'process_generating') setTextGenerationStatus(true);
+        else setTextGenerationStatus(false);
+        */
+
+        // Method 2: Slightly less reliable but less CPU intensive
+        if (event.data.includes('process_starts') && JSON.parse(event.data)?.msg === 'process_starts') {
+          // Status: generation started
+          clearTimeout(generationStatusChangeTimeout);
+          setTextGenerationStatus(true);
+        } else if (event.data.includes('process_completed') && JSON.parse(event.data)?.msg === 'process_completed') {
+          // Status: generation finished
+          clearTimeout(generationStatusChangeTimeout);
+          // Prevent WebSocket messages in rapid succession overriding the status too quickly
+          generationStatusChangeTimeout = setTimeout(() => {
+            setTextGenerationStatus(false);
+          }, 150);
+        } else {
+          // Status: generation in progress
+          clearTimeout(generationStatusChangeTimeout);
+        }
+      } catch {
+        setTextGenerationStatus(false);
+      }
     });
-    // Update generating status
-    setTextGenerationStatus(true);
-    // Stop trying to find the indicator once found
-    clearInterval(textGenerationIndicatorFinder);
-  }
-}, 200);
+
+    // Return the original WebSocket so other scripts can still use it
+    return ws;
+  };
+}
 
 /*
  * Add copy button to code blocks
@@ -275,8 +291,9 @@ function setActivationStatus(isActive) {
   }
 }
 
-// Once everything is ready, activate the extension
+// Once everything is ready, activate the extension and start intercepting WebSocket messages
 setActivationStatus(params.activate);
+interceptWebSocket();
 
 // Update locally stored params
 function setParams(newParams) {
