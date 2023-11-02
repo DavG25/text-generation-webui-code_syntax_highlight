@@ -34,9 +34,29 @@ let params = JSON.parse(dataProxy.getAttribute('params'));
 let isGeneratingText = false;
 
 const settingsAccordion = document.getElementById('code-syntax-highlight_accordion');
+// Find the settings title element inside the accordion by its text
+function findElementByText(node, searchText) {
+  let foundElement = null;
+  const traverseNodes = (inputNode) => {
+    if (foundElement) return;
+    if (inputNode.nodeType === Node.TEXT_NODE && inputNode.textContent.trim() === searchText) {
+      foundElement = inputNode.parentNode;
+      return;
+    }
+    if (inputNode.childNodes) {
+      Array.from(inputNode.childNodes).forEach((childNode) => {
+        traverseNodes(childNode);
+      });
+    }
+  };
+  traverseNodes(node);
+  return foundElement;
+}
+const settingsTitle = findElementByText(settingsAccordion, 'Code Syntax Highlight - Settings');
 
 // Disable the settings menu and prevent any setting change
 function disableSettingsAccordion() {
+  if (settingsTitle) settingsTitle.textContent = 'Code Syntax Highlight - Settings (processing)';
   settingsAccordion.classList.add('disabled');
   Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
     inputElement.disabled = true;
@@ -47,6 +67,7 @@ function disableSettingsAccordion() {
 }
 // Enable the settings menu and allow settings changes
 function enableSettingsAccordion() {
+  if (settingsTitle) settingsTitle.textContent = 'Code Syntax Highlight - Settings';
   settingsAccordion.classList.remove('disabled');
   Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
     inputElement.disabled = false;

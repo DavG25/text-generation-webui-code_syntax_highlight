@@ -55,9 +55,6 @@ def js_params_updater(paramName):
 # CSS for the accordion on the Gradio UI
 css_accordion = '''
   #code-syntax-highlight_accordion p.settings-warning {
-    display: none;
-  }
-  #code-syntax-highlight_accordion.disabled p.settings-warning {
     display: block;
     color: var(--block-info-text-color, inherit);
     margin-bottom: 0;
@@ -99,7 +96,7 @@ def ui():
         # Settings warning message and accordion style
         gr.HTML(value=f'''
           <style> {css_accordion} </style>
-          <p class="settings-warning">Please wait for text generation to end before changing settings</p>
+          <p class="settings-warning">Settings can only be modified when the web UI is not generating text or performing other operations</p>
         ''')
         # Setting: activate
         activate = gr.Checkbox(value=params['activate'], label='Enable extension and syntax highlighting of code snippets')
