@@ -88,8 +88,33 @@ function setTextGenerationStatus(newGeneratingStatus) {
   }
 }
 
-// Intercept the WebSocket messages and update the text generation status accordingly
+/*
+ * Detect the current status of text generation by intercepting WebSocket messages
+ *
+ * The average performance hit using this intercept method is about 1/10 of a
+ * millisecond on a modern CPU and about half a millisecond on an older CPU,
+ * even with larger WebSocket payloads the performance hit remains similar
+ *
+ * The performance hit refers to how much time this method adds to the total
+ * time it takes to generate one token (in the context of text generation)
+ *
+ * For example when intercepting and parsing the message, the generation of a
+ * single token takes 25.1 milliseconds, when we don't intercept and parse,
+ * the same token generation takes 25.0 milliseconds
+ *
+ * This is the logic behind how we detect the current status of text generation:
+ *
+ * (1) WebSocket received a message, we intercept it and parse it
+ * (2) Is the message status either 'process_generating' or 'process_start'?
+ *  -> If yes, we set the text generation status to 'true'
+ *  -> If no, continue to (3)
+ * (3) We wait a period of milliseconds defined in 'generationStatusChangeGracePeriod'
+ * (4) Did we receive any new WebSocket messages while waiting?
+ *  -> If yes, go back to (1)
+ *  -> If no, we set the text generation status to 'false'
+ */
 let generationStatusChangeTimeout;
+const generationStatusChangeGracePeriod = 300;
 function interceptWebSocket() {
   // Find the WebSocket connection
   const OriginalWebSocket = window.WebSocket;
@@ -100,28 +125,16 @@ function interceptWebSocket() {
     // Listen for incoming messages
     ws.addEventListener('message', (event) => {
       try {
-        // Method 1: Reliable and at the same time CPU intensive
-        /*
         const status = JSON.parse(event.data).msg;
-        if (status == 'process_generating') setTextGenerationStatus(true);
-        else setTextGenerationStatus(false);
-        */
-
-        // Method 2: Slightly less reliable but less CPU intensive
-        if (event.data.includes('process_starts') && JSON.parse(event.data)?.msg === 'process_starts') {
-          // Status: generation started
+        if (status === 'process_generating' || status === 'process_start') {
           clearTimeout(generationStatusChangeTimeout);
           setTextGenerationStatus(true);
-        } else if (event.data.includes('process_completed') && JSON.parse(event.data)?.msg === 'process_completed') {
-          // Status: generation finished
+        } else {
           clearTimeout(generationStatusChangeTimeout);
           // Prevent WebSocket messages in rapid succession overriding the status too quickly
           generationStatusChangeTimeout = setTimeout(() => {
             setTextGenerationStatus(false);
-          }, 150);
-        } else {
-          // Status: generation in progress
-          clearTimeout(generationStatusChangeTimeout);
+          }, generationStatusChangeGracePeriod);
         }
       } catch {
         setTextGenerationStatus(false);
