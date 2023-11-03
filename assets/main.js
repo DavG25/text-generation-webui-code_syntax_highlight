@@ -18,18 +18,15 @@ const dataProxy = document.getElementById('code-syntax-highlight');
 let params = JSON.parse(dataProxy.getAttribute('params'));
 
 /*
- * Detect the current text generation status by intercepting
- * the WebSocket messages received by the Web UI
+ * Update the UI elements when the current status of text generation changes
  *
- * We only parse the WebSocket message as JSON when we detect
- * a 'process_starts' or 'process_completed' string inside of it
+ * We lock the extension settings from being modified while text is being generated
  *
- * This could cause the WebSocket message to be parsed if the inner content has either of those
- * strings, but in that case the resulting generation status will still be the right one, as
- * we detect it from the parsed message in the end
+ * Locking the settings avoids a weird bug where some events (such as a checkbox
+ * changing value) are sometimes not registered when text is being generated
  *
- * Using this method will also intercept other loading operations,
- * but that is a minor downside with no impact in this case
+ * This behavior should be investigated to understand why it happens
+ * and if it's something related to the Web UI or Gradio itself
  */
 let isGeneratingText = false;
 
