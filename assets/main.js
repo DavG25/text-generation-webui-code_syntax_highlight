@@ -214,21 +214,22 @@ function removeHighlight() {
  * (2) Are there any code blocks in the DOM?
  *  -> If no, stop
  *  -> If yes, continue to (3)
- * (3) Is text still being generated?
+ * (3) We wait a period of milliseconds defined in 'performanceHighlightWaitPeriod'
+ * (4) Is text still being generated?
  *  -> If yes, go back to (3)
- *  -> If no, continue to (4)
- * (4) We highlight all code blocks present on the page
+ *  -> If no, we highlight all code blocks present on the page
  *
  * We need to highlight all code blocks again every time the DOM finishes
  * updating, because the text generation overrides the classes set by highlight.js
  */
-let highlightTimeout;
+let performanceHighlightTimeout;
+const performanceHighlightWaitPeriod = 100;
 function performanceHighlight() {
-  clearTimeout(highlightTimeout);
-  highlightTimeout = setTimeout(() => {
+  clearTimeout(performanceHighlightTimeout);
+  performanceHighlightTimeout = setTimeout(() => {
     if (isGeneratingText === false) highlightCode();
     else performanceHighlight();
-  }, 100);
+  }, performanceHighlightWaitPeriod);
 }
 
 // Watch for changes in the DOM body with arrive.js to highlight new code blocks as they appear
