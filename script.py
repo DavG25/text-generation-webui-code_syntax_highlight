@@ -27,7 +27,7 @@ with open(assets_dir / 'highlightjs-copy.css', 'r') as f:
 with open(assets_dir / 'extension.json', 'r') as f:
     extension_info = json.load(f)
 
-# Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/Extensions.md#params-dictionary
+# Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/07%20%E2%80%90%20Extensions.md#how-to-write-an-extension
 params = {
     'activate': True, # TODO: Separate activate from highlight, so for example we can still enable copy_button without the highlight
     'inline_highlight': False,

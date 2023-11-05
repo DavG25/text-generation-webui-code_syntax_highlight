@@ -12,15 +12,11 @@
  *
  * performance_mode: if set to true, the extension will wait until text generation
  * ends before highlighting the code on the page to use less resources
- *
  */
 const dataProxy = document.getElementById('code-syntax-highlight');
 let params = JSON.parse(dataProxy.getAttribute('params'));
 
-/*
- * Update the global 'isGeneratingText' value and trigger related actions
- *
- */
+// Update the global 'isGeneratingText' value and trigger related actions
 let isGeneratingText = false;
 function setTextGenerationStatus(newGeneratingStatus) {
   isGeneratingText = newGeneratingStatus;
@@ -311,7 +307,6 @@ function setParams(newParams) {
  * This method is far more reliable then using a proxy and waiting for Gradio
  * to send us the updated values, as sometimes Gradio doesn't correctly queue
  * events and some data is lost
- *
  */
 const paramNames = Object.keys(params);
 paramNames.forEach((paramName) => {
