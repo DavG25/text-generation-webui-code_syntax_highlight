@@ -29,6 +29,7 @@ with open(assets_dir / 'extension.json', 'r') as f:
 
 # Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/07%20%E2%80%90%20Extensions.md#how-to-write-an-extension
 params = {
+    'display_name': 'Code Syntax Highlight',
     'activate': True, # TODO: Separate activate from highlight, so for example we can still enable copy_button without the highlight
     'inline_highlight': False,
     'copy_button': False,
@@ -72,7 +73,7 @@ def ui():
         interface.load(None, None, None, _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
 
     # Display extension settings in the Gradio UI
-    with gr.Accordion('Code Syntax Highlight - Settings', elem_id='code-syntax-highlight_accordion', open=True):
+    with gr.Accordion(label=params['display_name'], elem_id='code-syntax-highlight_accordion', open=True):
         # Accordion style
         gr.HTML(value=f'<style> {css_accordion} </style>')
         # Setting: activate
