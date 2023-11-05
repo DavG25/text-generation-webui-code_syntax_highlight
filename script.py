@@ -32,7 +32,7 @@ params = {
     'activate': True, # TODO: Separate activate from highlight, so for example we can still enable copy_button without the highlight
     'inline_highlight': False,
     'copy_button': False,
-    'performance_mode': False,
+    'performance_mode': True,
 }
 
 # JS to check for extension's updates
