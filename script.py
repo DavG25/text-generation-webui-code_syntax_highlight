@@ -41,28 +41,8 @@ js_extension_updater = f'''
   if (confirm('Open the GitHub page of Code Syntax Highlight?')) window.open(extensionInfo.gitUrl + '/releases/latest', '_blank');
 '''
 
-# JS to update the specified param so that JS modules can access it
-def js_params_updater(paramName):
-    return '(x) => { ' + f'''
-      const paramName = '{paramName}';
-    ''' + '''
-      const element = document.getElementById('code-syntax-highlight');
-      const params = JSON.parse(element.getAttribute('params'));
-      params[paramName] = x;
-      element.setAttribute('params', JSON.stringify(params));
-    ''' + ' }'
-
 # CSS for the accordion on the Gradio UI
 css_accordion = '''
-  #code-syntax-highlight_accordion p.settings-warning {
-    display: block;
-    color: var(--block-info-text-color, inherit);
-    margin-bottom: 0;
-  }
-  #code-syntax-highlight_accordion.disabled .form {
-    opacity: 0.5;
-    pointer-events: none;
-  }
   #code-syntax-highlight_accordion p.version-label {
     margin: 0;
     line-height: 1rem;
@@ -93,23 +73,36 @@ def ui():
 
     # Display extension settings in the Gradio UI
     with gr.Accordion('Code Syntax Highlight - Settings', elem_id='code-syntax-highlight_accordion', open=True):
-        # Settings warning message and accordion style
-        gr.HTML(value=f'''
-          <style> {css_accordion} </style>
-          <p class="settings-warning">Settings can only be modified when the web UI is not generating text or performing other operations</p>
-        ''')
+        # Accordion style
+        gr.HTML(value=f'<style> {css_accordion} </style>')
         # Setting: activate
-        activate = gr.Checkbox(value=params['activate'], label='Enable extension and syntax highlighting of code snippets')
-        activate.change(lambda x: params.update({'activate': x}), activate, _js=js_params_updater('activate'))
+        gr.Checkbox(
+            value=params['activate'],
+            label='Enable extension and syntax highlighting of code snippets',
+            interactive=True,
+            elem_id='code-syntax-highlight--activate'
+        )
         # Setting: inline_highlight
-        inline_highlight = gr.Checkbox(value=params['inline_highlight'], label='Highlight inline code snippets')
-        inline_highlight.change(lambda x: params.update({'inline_highlight': x}), inline_highlight, _js=js_params_updater('inline_highlight'))
+        gr.Checkbox(
+            value=params['inline_highlight'],
+            label='Highlight inline code snippets',
+            interactive=True,
+            elem_id='code-syntax-highlight--inline_highlight'
+        )
         # Setting: copy_button
-        copy_button = gr.Checkbox(value=params['copy_button'], label='Show button to copy code inside code snippets')
-        copy_button.change(lambda x: params.update({'copy_button': x}), copy_button, _js=js_params_updater('copy_button'))
+        gr.Checkbox(
+            value=params['copy_button'],
+            label='Show button to copy code inside code snippets',
+            interactive=True,
+            elem_id='code-syntax-highlight--copy_button'
+        )
         # Setting: performance_mode
-        performance_mode = gr.Checkbox(value=params['performance_mode'], label='Reduce CPU usage by only highlighting after text generation ends')
-        performance_mode.change(lambda x: params.update({'performance_mode': x}), performance_mode, _js=js_params_updater('performance_mode'))
+        gr.Checkbox(
+            value=params['performance_mode'],
+            label='Reduce CPU usage by only highlighting after text generation ends',
+            interactive=True,
+            elem_id='code-syntax-highlight--performance_mode'
+        )
         # Version info and update check button
         with gr.Row():
             gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')

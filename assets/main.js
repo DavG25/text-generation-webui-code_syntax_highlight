@@ -18,70 +18,17 @@ const dataProxy = document.getElementById('code-syntax-highlight');
 let params = JSON.parse(dataProxy.getAttribute('params'));
 
 /*
- * Update the UI elements when the current status of text generation changes
+ * Update the global 'isGeneratingText' value and trigger related actions
  *
- * We lock the extension settings from being modified while text is being generated
- *
- * Locking the settings avoids a weird bug where some events (such as a checkbox
- * changing value) are sometimes not registered when text is being generated
- *
- * This behavior should be investigated to understand why it happens
- * and if it's something related to the Web UI or Gradio itself
  */
 let isGeneratingText = false;
-
-const settingsAccordion = document.getElementById('code-syntax-highlight_accordion');
-// Find the settings title element inside the accordion by its text
-function findElementByText(node, searchText) {
-  let foundElement = null;
-  const traverseNodes = (inputNode) => {
-    if (foundElement) return;
-    if (inputNode.nodeType === Node.TEXT_NODE && inputNode.textContent.trim() === searchText) {
-      foundElement = inputNode.parentNode;
-      return;
-    }
-    if (inputNode.childNodes) {
-      Array.from(inputNode.childNodes).forEach((childNode) => {
-        traverseNodes(childNode);
-      });
-    }
-  };
-  traverseNodes(node);
-  return foundElement;
-}
-const settingsTitle = findElementByText(settingsAccordion, 'Code Syntax Highlight - Settings');
-
-// Disable the settings menu and prevent any setting change
-function disableSettingsAccordion() {
-  if (settingsTitle) settingsTitle.textContent = 'Code Syntax Highlight - Settings (processing)';
-  settingsAccordion.classList.add('disabled');
-  Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
-    inputElement.disabled = true;
-  });
-  settingsAccordion.arrive('INPUT', (inputElement) => {
-    inputElement.disabled = true;
-  });
-}
-// Enable the settings menu and allow settings changes
-function enableSettingsAccordion() {
-  if (settingsTitle) settingsTitle.textContent = 'Code Syntax Highlight - Settings';
-  settingsAccordion.classList.remove('disabled');
-  Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
-    inputElement.disabled = false;
-  });
-  settingsAccordion.unbindArrive('INPUT');
-}
-
-// Update the global 'isGeneratingText' value and trigger related actions
 function setTextGenerationStatus(newGeneratingStatus) {
   isGeneratingText = newGeneratingStatus;
   // Signal the generation status in CSS, this is used by UI components
   if (newGeneratingStatus) {
     document.body.classList.add('code-syntax-highlight--is-generating-text');
-    disableSettingsAccordion();
   } else {
     document.body.classList.remove('code-syntax-highlight--is-generating-text');
-    enableSettingsAccordion();
   }
 }
 
@@ -357,18 +304,24 @@ function setParams(newParams) {
   }
 }
 
-// Watch for changes in the params
-const paramsObserver = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.attributeName === 'params') {
-      const newParams = JSON.parse(dataProxy.getAttribute('params'));
-      setParams(newParams);
-    }
+/*
+ * Watch for changes in the HTML inputs (checkboxes)
+ *
+ * This method is far more reliable then using a proxy and waiting for Gradio
+ * to send us the updated values, as sometimes Gradio doesn't correctly queue
+ * events and some data is lost
+ *
+ */
+const paramNames = Object.keys(params);
+paramNames.forEach((paramName) => {
+  // Find the corresponding HTML checkbox associated with the param
+  const input = document.querySelector(`#code-syntax-highlight--${paramName} input`);
+  // Add event listener to update the corresponding param when the checkbox is changed
+  input.addEventListener('change', (event) => {
+    // Clone old params to new object to avoid directly changing them
+    const newParams = structuredClone(params);
+    newParams[paramName] = event.target.checked;
+    // Globally update params
+    setParams(newParams);
   });
-});
-paramsObserver.observe(dataProxy, {
-  attributes: true,
-  attributeFilter: ['params'],
-  childList: false,
-  subtree: false,
 });
