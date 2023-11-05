@@ -312,6 +312,8 @@ const paramNames = Object.keys(params);
 paramNames.forEach((paramName) => {
   // Find the corresponding HTML checkbox associated with the param
   const input = document.querySelector(`#code-syntax-highlight--${paramName} input`);
+  // Skip params that don't have a corresponding checkbox in the UI
+  if (!input) return;
   // Add event listener to update the corresponding param when the checkbox is changed
   input.addEventListener('change', (event) => {
     // Clone old params to new object to avoid directly changing them
