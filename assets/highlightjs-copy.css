@@ -7,16 +7,6 @@
   overflow: hidden !important;
 }
 
-/* Increase code block height if copy button doesn't fit */
-.hljs-copy-narrow-wrapper code {
-  min-height: 2rem !important;
-}
-
-.hljs-copy-narrow-wrapper .hljs-copy-button {
-  height: 100% !important;
-  max-height: 2rem !important;
-}
-
 .hljs-copy-wrapper:hover .hljs-copy-button,
 .hljs-copy-button:focus,
 .hljs-copy-button[data-copied="true"] {
@@ -33,6 +23,7 @@ pre>.hljs-copy-button {
   display: block !important;
 }
 
+/* The background image and some other values are handled in the respective highlight.js CSS theme files */
 .hljs-copy-button {
   position: absolute !important;
   margin-top: 5px !important;
@@ -41,11 +32,13 @@ pre>.hljs-copy-button {
   top: 1em !important;
   right: 1em !important;
   width: 2rem !important;
-  height: 2rem !important;
+  height: 100% !important;
+  max-height: 2rem !important;
   text-indent: -9999px !important;
   border-radius: 0.25rem !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+  background-size: 60% 100% !important;
   transition: background-color 200ms ease, transform 200ms ease-out !important;
 }
 

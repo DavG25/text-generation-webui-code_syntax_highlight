@@ -16,15 +16,59 @@ class CopyButtonPlugin {
     });
     button.dataset.copied = false;
 
-    // Create reference to <pre> tag
+    // Calculate the height of a code block based on its content and styles
+    function getComputedHeight() {
+      let totalHeight = 0;
+
+      // Count newlines inside the text of the code block
+      const newlineCount = (text.match(/\n/g) || []).length;
+
+      // Get height of the padding
+      totalHeight += parseFloat(window.getComputedStyle(el, null).getPropertyValue('padding-top')) || 0;
+      totalHeight += parseFloat(window.getComputedStyle(el, null).getPropertyValue('padding-bottom')) || 0;
+
+      // Get line height
+      const lineHeight = parseFloat(window.getComputedStyle(el, null).getPropertyValue('line-height')) || false;
+
+      // Calculate final total height (if line height is not available we use font height instead)
+      if (lineHeight !== false) {
+        totalHeight += newlineCount * lineHeight;
+      } else {
+        // Get the font size
+        const fontHeight = parseFloat(window.getComputedStyle(el, null).getPropertyValue('font-size')) || 0;
+        // Calculate the height of all the lines of text
+        totalHeight += newlineCount * fontHeight;
+      }
+
+      return totalHeight;
+    }
+
+    // Create reference to the <pre> element
     const wrapper = el.parentElement;
 
-    // Check if code block height is not enough for the copy button to fit, then add class to fix
-    if (wrapper.offsetHeight < 42) {
-      wrapper.classList.add('hljs-copy-narrow-wrapper');
-      // Calculate and apply the top margin to align
-      // copy button in the middle of the narrow code block
-      let topMargin = Math.floor((wrapper.offsetHeight - 32) / 2);
+    /*
+     * Get the height of the <pre> element
+     *
+     * If the height is 0 (meaning the element has not been rendered yet) we calculate the height
+     * using an alternative method
+     *
+     * The height being 0 happens when we start the web UI and the code blocks are created
+     * inside a tab that is currently not displayed, for example when we start the web UI
+     * and quickly change to the 'Notebook' tab before the code blocks are rendered
+     * in the 'Chat' tab
+     *
+     * When using the alternative method to get the height, we make a best guess based on the
+     * content and style of the <code> block
+     *
+     * We could also clone the entire element and render it to get the actual height but that
+     * is a waste of resources for an edge case like this
+     */
+    const wrapperHeight = wrapper.clientHeight || getComputedHeight();
+
+    // Check if the code block height is not enough for the copy button to fit inside of it
+    if (wrapperHeight < 42) {
+      // Calculate and apply the top margin to align the copy button in the middle of the code block
+      let topMargin = Math.floor((wrapperHeight - 32) / 2);
       if (topMargin < 0) topMargin = 0;
       else if (topMargin > 5) topMargin = 5;
       button.style.setProperty('margin-top', `${topMargin}px`, 'important');
