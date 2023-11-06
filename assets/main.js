@@ -12,89 +12,79 @@
  *
  * performance_mode: if set to true, the extension will wait until text generation
  * ends before highlighting the code on the page to use less resources
- *
  */
 const dataProxy = document.getElementById('code-syntax-highlight');
 let params = JSON.parse(dataProxy.getAttribute('params'));
 
-// Define other global vars
+// Update the global 'isGeneratingText' value and trigger related actions
 let isGeneratingText = false;
-
-/*
- * Detect current text generation status
- *
- * We use this to detect when the webui is generating text, so we
- * can disable the accordion in the Gradio UI (this is to prevent settings
- * not applying after they are changed when text is being generated)
- *
- * Not a fan of using this method to get the generation status, but I'm not aware of any
- * other way, it also not possible to detect text generated with 'Impersonate' using this
- *
- * We could use a MutationObserver on the whole body to detect any class changes and then
- * check for the 'generating' class, but that would impact the performance too much
- */
-const settingsAccordion = document.getElementById('code-syntax-highlight_accordion');
-
-// Disable the settings menu and prevent any setting change
-function disableSettingsAccordion() {
-  settingsAccordion.classList.add('disabled');
-  Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
-    inputElement.disabled = true;
-  });
-  settingsAccordion.arrive('INPUT', (inputElement) => {
-    inputElement.disabled = true;
-  });
-}
-// Enable the settings menu and allow settings changes
-function enableSettingsAccordion() {
-  settingsAccordion.classList.remove('disabled');
-  Array.from(document.querySelectorAll('#code-syntax-highlight_accordion input')).forEach((inputElement) => {
-    inputElement.disabled = false;
-  });
-  settingsAccordion.unbindArrive('INPUT');
-}
-
-// Update global 'isGeneratingText' var and trigger associated actions
 function setTextGenerationStatus(newGeneratingStatus) {
   isGeneratingText = newGeneratingStatus;
+  // Signal the generation status in CSS, this is used by UI components
   if (newGeneratingStatus) {
     document.body.classList.add('code-syntax-highlight--is-generating-text');
-    disableSettingsAccordion();
   } else {
     document.body.classList.remove('code-syntax-highlight--is-generating-text');
-    enableSettingsAccordion();
   }
 }
 
-// Watch for changes in the text generation status
-const textGenerationObserver = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.attributeName === 'class') {
-      // Update generating status
-      setTextGenerationStatus(mutation.target.classList.contains('generating'));
-    }
-  });
-});
+/*
+ * Detect the current status of text generation by intercepting WebSocket messages
+ *
+ * The average performance hit using this intercept method is about 1/10 of a
+ * millisecond on a modern CPU and about half a millisecond on an older CPU,
+ * even with larger WebSocket payloads the performance hit remains similar
+ *
+ * The performance hit refers to how much time this method adds to the total
+ * time it takes to generate one token (in the context of text generation)
+ *
+ * For example when intercepting and parsing the message, the generation of a
+ * single token takes 25.1 milliseconds, when we don't intercept and parse,
+ * the same token generation takes 25.0 milliseconds
+ *
+ * This is the logic behind how we detect the current status of text generation:
+ *
+ * (1) WebSocket received a message, we intercept it and parse it
+ * (2) Is the message status either 'process_generating' or 'process_start'?
+ *  -> If yes, we set the text generation status to 'true'
+ *  -> If no, continue to (3)
+ * (3) We wait a period of milliseconds defined in 'generationStatusChangeGracePeriod'
+ * (4) Did we receive any new WebSocket messages while waiting?
+ *  -> If yes, go back to (1)
+ *  -> If no, we set the text generation status to 'false'
+ */
+let generationStatusChangeTimeout;
+const generationStatusChangeGracePeriod = 300;
+function interceptWebSocket() {
+  // Find the WebSocket connection
+  const OriginalWebSocket = window.WebSocket;
 
-// Try to find the text generation indicator and hook the MutationObserver to it once found
-// Using this method we can't detect if text is generating with 'Impersonate'
-const textGenerationIndicatorFinder = setInterval(() => {
-  const textGenerationIndicator = document.querySelector('div.app [id=\'main\'] div[class*=\'generating\']');
-  if (textGenerationIndicator) {
-    // Only start to observe the text generation indicator after the first ever generation
-    // This is to make sure we're observing the right element
-    textGenerationObserver.observe(textGenerationIndicator, {
-      attributes: true,
-      attributeFilter: ['class'],
-      childList: false,
-      subtree: false,
+  window.WebSocket = function construct(url, protocols) {
+    const ws = new OriginalWebSocket(url, protocols);
+
+    // Listen for incoming messages
+    ws.addEventListener('message', (event) => {
+      try {
+        const status = JSON.parse(event.data).msg;
+        if (status === 'process_generating' || status === 'process_start') {
+          clearTimeout(generationStatusChangeTimeout);
+          setTextGenerationStatus(true);
+        } else {
+          clearTimeout(generationStatusChangeTimeout);
+          // Prevent WebSocket messages in rapid succession overriding the status too quickly
+          generationStatusChangeTimeout = setTimeout(() => {
+            setTextGenerationStatus(false);
+          }, generationStatusChangeGracePeriod);
+        }
+      } catch {
+        setTextGenerationStatus(false);
+      }
     });
-    // Update generating status
-    setTextGenerationStatus(true);
-    // Stop trying to find the indicator once found
-    clearInterval(textGenerationIndicatorFinder);
-  }
-}, 200);
+
+    // Return the original WebSocket so other scripts can still use it
+    return ws;
+  };
+}
 
 /*
  * Add copy button to code blocks
@@ -218,21 +208,22 @@ function removeHighlight() {
  * (2) Are there any code blocks in the DOM?
  *  -> If no, stop
  *  -> If yes, continue to (3)
- * (3) Is text still being generated?
+ * (3) We wait a period of milliseconds defined in 'performanceHighlightWaitPeriod'
+ * (4) Is text still being generated?
  *  -> If yes, go back to (3)
- *  -> If no, continue to (4)
- * (4) We highlight all code blocks present on the page
+ *  -> If no, we highlight all code blocks present on the page
  *
  * We need to highlight all code blocks again every time the DOM finishes
  * updating, because the text generation overrides the classes set by highlight.js
  */
-let highlightTimeout;
+let performanceHighlightTimeout;
+const performanceHighlightWaitPeriod = 100;
 function performanceHighlight() {
-  clearTimeout(highlightTimeout);
-  highlightTimeout = setTimeout(() => {
+  clearTimeout(performanceHighlightTimeout);
+  performanceHighlightTimeout = setTimeout(() => {
     if (isGeneratingText === false) highlightCode();
     else performanceHighlight();
-  }, 100);
+  }, performanceHighlightWaitPeriod);
 }
 
 // Watch for changes in the DOM body with arrive.js to highlight new code blocks as they appear
@@ -273,8 +264,9 @@ function setActivationStatus(isActive) {
   }
 }
 
-// Once everything is ready, activate the extension
+// Once everything is ready, activate the extension and start intercepting WebSocket messages
 setActivationStatus(params.activate);
+interceptWebSocket();
 
 // Update locally stored params
 function setParams(newParams) {
@@ -307,18 +299,25 @@ function setParams(newParams) {
   }
 }
 
-// Watch for changes in the params
-const paramsObserver = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.attributeName === 'params') {
-      const newParams = JSON.parse(dataProxy.getAttribute('params'));
-      setParams(newParams);
-    }
+/*
+ * Watch for changes in the HTML inputs (checkboxes)
+ *
+ * This method is far more reliable then using a proxy and waiting for Gradio
+ * to send us the updated values, as sometimes Gradio doesn't correctly queue
+ * events and some data is lost
+ */
+const paramNames = Object.keys(params);
+paramNames.forEach((paramName) => {
+  // Find the corresponding HTML checkbox associated with the param
+  const input = document.querySelector(`#code-syntax-highlight--${paramName} input`);
+  // Skip params that don't have a corresponding checkbox in the UI
+  if (!input) return;
+  // Add event listener to update the corresponding param when the checkbox is changed
+  input.addEventListener('change', (event) => {
+    // Clone old params to new object to avoid directly changing them
+    const newParams = structuredClone(params);
+    newParams[paramName] = event.target.checked;
+    // Globally update params
+    setParams(newParams);
   });
-});
-paramsObserver.observe(dataProxy, {
-  attributes: true,
-  attributeFilter: ['params'],
-  childList: false,
-  subtree: false,
 });
