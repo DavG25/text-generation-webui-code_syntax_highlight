@@ -58,6 +58,6 @@ For settings to persist over web UI restarts and reloads, add the following line
 code_syntax_highlight-activate: true
 code_syntax_highlight-inline_highlight: false
 code_syntax_highlight-copy_button: false
-code_syntax_highlight-performance_mode: false
+code_syntax_highlight-performance_mode: true
 ```
 Change the values (`true` / `false`) according to the preferred settings
