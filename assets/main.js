@@ -102,9 +102,7 @@ const textGenerationIndicatorFinder = setInterval(() => {
  * Only full code blocks (not inline ones) will show the copy button
  */
 let isCopyButtonPluginLoaded = false;
-const copyButtonPlugin = new CopyButtonPlugin({
-  lang: 'en',
-});
+const copyButtonPlugin = new CopyButtonPlugin();
 
 // Add or remove the hljs copy button plugin based on the current params
 function updateCopyButtonPluginStatus() {

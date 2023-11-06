@@ -6,14 +6,12 @@ class CopyButtonPlugin {
   constructor(options = {}) {
     this.hook = options.hook;
     this.callback = options.callback;
-    this.locales = { en: ['Copy', 'Copied!', 'Copied to clipboard'] };
-    this.lang = options.lang || document.documentElement.lang || 'en';
   }
 
   'after:highlightElement'({ el, text }) {
     // Create copy button
     const button = Object.assign(document.createElement('button'), {
-      innerHTML: this.locales[this.lang]?.[0] || 'Copy',
+      innerText: 'Copy to clipboard',
       className: 'hljs-copy-button',
     });
     button.dataset.copied = false;
@@ -55,32 +53,19 @@ class CopyButtonPlugin {
       // Write text into the clipboard
       navigator.clipboard.writeText(newText).then(() => {
         // Update button status
-        button.innerHTML = this.locales[this.lang]?.[1] || 'Copied!';
+        button.innerText = 'Copied to clipboard';
         button.dataset.copied = true;
-        button.tabIndex = -1;
         button.disabled = true;
         button.style.pointerEvents = 'none';
-
-        // Alert for screen readers
-        let alert = Object.assign(document.createElement('div'), {
-          role: 'status',
-          className: 'hljs-copy-alert',
-          innerHTML: this.locales[this.lang]?.[2] || 'Copied to clipboard',
-        });
-        alert.setAttribute('style', 'clip: rect(0 0 0 0) !important; clip-path: inset(50%) !important; height: 1px !important; overflow: hidden !important; position: absolute !important; white-space: nowrap !important; width: 1px !important;');
-        wrapper.appendChild(alert);
 
         // Revert button status
         setTimeout(() => {
           // Remove focus from button so it hides again
           button.blur();
-          button.innerHTML = this.locales[this.lang]?.[0] || 'Copy';
+          button.innerText = 'Copy to clipboard';
           button.dataset.copied = false;
-          button.removeAttribute('tabindex');
           button.disabled = false;
           button.style.pointerEvents = null;
-          wrapper.removeChild(alert);
-          alert = null;
         }, 2000);
       }).then(() => {
         if (typeof callback === 'function') return this.callback(newText, el);
