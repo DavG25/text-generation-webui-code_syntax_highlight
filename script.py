@@ -18,7 +18,7 @@ with open(assets_dir / 'highlightjs-copy.js', 'r') as f:
 with open(assets_dir / 'main.js', 'r') as f:
     js_modules += f.read() + '\n'
 with open(assets_dir / 'update-check.js', 'r') as f:
-    js_update_check = '\n' + f.read() + '\n'
+    js_update_check =  f.read() + '\n'
 with open(assets_dir / 'github.css', 'r') as f:
     css_theme_light = f.read()
 with open(assets_dir / 'github-dark.css', 'r') as f:
