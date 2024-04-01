@@ -70,7 +70,7 @@ def ui():
           <style id="hljs-copy-button" media="not all"> {css_copy_button} </style>
           <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
         ''', visible=False)
-        interface.load(None, None, None, _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
+        interface.load(None, None, None, js=f'() => {{{js_data_proxy_loader+js_modules}}}')
 
     # Display extension settings in the Gradio UI
     with gr.Accordion(label=params['display_name'], elem_id='code-syntax-highlight_accordion', open=True):
@@ -108,4 +108,4 @@ def ui():
         with gr.Row():
             gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')
             check_for_updates = gr.Button('Check for updates')
-            check_for_updates.click(None, None, None, _js=f'() => {{{js_extension_updater}}}')
+            check_for_updates.click(None, None, None, js=f'() => {{{js_extension_updater}}}')
