@@ -98,25 +98,25 @@ const copyButtonPlugin = new CopyButtonPlugin();
 function updateCopyButtonPluginStatus() {
   if (params.copy_button === true && !isCopyButtonPluginLoaded) {
     hljs.addPlugin(copyButtonPlugin);
-    document.getElementById('hljs-copy-button').setAttribute('media', 'all');
     isCopyButtonPluginLoaded = true;
   } else if (params.copy_button === false && isCopyButtonPluginLoaded) {
     hljs.removePlugin(copyButtonPlugin);
-    document.getElementById('hljs-copy-button').setAttribute('media', 'not all');
     isCopyButtonPluginLoaded = false;
   }
 }
 
-// Remove copy button associated with the provided code block element
+// Remove copy button associated with the provided code block element along with the no longer necessary wrapper class
 function removeCopyButtonFromCodeElement(codeElement) {
   const preWrapperElement = codeElement.parentElement;
   Array.from(preWrapperElement.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
+    preWrapperElement.classList.remove('hljs-copy-wrapper');
     copyCodeButton.remove();
   });
 }
-// Remove every copy button from all code blocks
+// Remove every copy button from all code blocks along with the no longer necessary wrapper classes
 function removeAllCopyButtons() {
   Array.from(document.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
+    copyCodeButton.parentElement.classList.remove('hljs-copy-wrapper');
     copyCodeButton.remove();
   });
 }
@@ -302,7 +302,7 @@ function setParams(newParams) {
 /*
  * Watch for changes in the HTML inputs (checkboxes)
  *
- * This method is far more reliable then using a proxy and waiting for Gradio
+ * This method is far more reliable than using a proxy and waiting for Gradio
  * to send us the updated values, as sometimes Gradio doesn't correctly queue
  * events and some data is lost
  */
