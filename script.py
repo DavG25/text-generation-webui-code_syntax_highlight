@@ -10,24 +10,26 @@ import gradio as gr
 #     [SHA256 - 4499FF936D4FD562ADCA5A5CBE512DC19EB80942EEE8618DAFBCEBC4F7974BDB]
 assets_dir = Path(__file__).resolve().parent / 'assets'
 with open(assets_dir / 'arrive.min.js', 'r') as f:
-    js_modules = f.read()
+    js_modules = f.read() + '\n'
 with open(assets_dir / 'highlight.min.js', 'r') as f:
-    js_modules += '\n' + f.read()
+    js_modules += f.read() + '\n'
 with open(assets_dir / 'highlightjs-copy.js', 'r') as f:
-    js_modules += '\n' + f.read()
+    js_modules += f.read() + '\n'
 with open(assets_dir / 'main.js', 'r') as f:
-    js_modules += '\n' + f.read()
+    js_modules += f.read() + '\n'
+with open(assets_dir / 'update-check.js', 'r') as f:
+    js_update_check = '\n' + f.read() + '\n'
 with open(assets_dir / 'github.css', 'r') as f:
     css_theme_light = f.read()
 with open(assets_dir / 'github-dark.css', 'r') as f:
     css_theme_dark = f.read()
 with open(assets_dir / 'highlightjs-copy.css', 'r') as f:
     css_copy_button = f.read()
-# Initialize extension information (like the current version)
+# Initialize extension information (like the current version number)
 with open(assets_dir / 'extension.json', 'r') as f:
     extension_info = json.load(f)
 
-# Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/07%20%E2%80%90%20Extensions.md#how-to-write-an-extension
+# Define extension config with global params - https://github.com/oobabooga/text-generation-webui/blob/main/docs/07%20-%20Extensions.md#how-to-write-an-extension
 params = {
     'display_name': 'Code Syntax Highlight',
     'activate': True, # TODO: Separate activate from highlight, so for example we can still enable copy_button without the highlight
@@ -35,12 +37,6 @@ params = {
     'copy_button': False,
     'performance_mode': True,
 }
-
-# JS to check for extension's updates
-js_extension_updater = f'''
-  const extensionInfo = {json.dumps(extension_info)};
-  if (confirm('Open the GitHub page of Code Syntax Highlight?')) window.open(extensionInfo.gitUrl + '/releases/latest', '_blank');
-'''
 
 # CSS for the accordion on the Gradio UI
 css_accordion = '''
@@ -53,29 +49,21 @@ css_accordion = '''
   }
 '''
 
-# Build UI and inject CSS and JS
+# HTML containing the styling for the highlight.js themes and the DOM element used as a proxy between Gradio and the injected JS
+html_internal = f'''
+  <style id="hljs-theme-light" media="not all"> {css_theme_light} </style>
+  <style id="hljs-theme-dark" media="not all"> {css_theme_dark} </style>
+  <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
+'''
+
+# Build UI and inject CSS
 def ui():
-    # JS to initialize the params for JS modules, we need to place this here because the params are loaded from settings.json when ui() is called
-    js_data_proxy_loader = f'''
-      document.getElementById('code-syntax-highlight').setAttribute('params', JSON.stringify({json.dumps(params)}));
-    '''
-
-    # When loading JS, instead of using shared.gradio['interface'], we create a new interface to avoid conflicts with other scripts (like ui.main_js)
-    with gr.Blocks(analytics_enabled=False) as interface:
-        # Load CSS and DOM element to be used as proxy between Gradio and the injected JS modules
-        gr.HTML(value=f'''
-          <style id="hljs-theme-light" media="not all"> {css_theme_light} </style>
-          <style id="hljs-theme-dark" media="not all"> {css_theme_dark} </style>
-          <style> button.hljs-copy-button {{ display: none; }} </style>
-          <style id="hljs-copy-button" media="not all"> {css_copy_button} </style>
-          <code-syntax-highlight id="code-syntax-highlight" style="display: none;"> </code-syntax-highlight>
-        ''', visible=False)
-        interface.load(None, None, None, _js=f'() => {{{js_data_proxy_loader+js_modules}}}')
-
     # Display extension settings in the Gradio UI
     with gr.Accordion(label=params['display_name'], elem_id='code-syntax-highlight_accordion', open=True):
         # Accordion style
         gr.HTML(value=f'<style> {css_accordion} </style>')
+        # Load additional HTML elements used by the extension
+        gr.HTML(value=html_internal, visible=False)
         # Setting: activate
         gr.Checkbox(
             value=params['activate'],
@@ -106,6 +94,25 @@ def ui():
         )
         # Version info and update check button
         with gr.Row():
-            gr.HTML(value=f'<p class="version-label"> Current extension version: {extension_info["version"]} </p>')
-            check_for_updates = gr.Button('Check for updates')
-            check_for_updates.click(None, None, None, _js=f'() => {{{js_extension_updater}}}')
+            gr.HTML(value=f'<p class="version-label">Current extension version: {extension_info["version"]}</p>')
+            gr.Button(
+                value='Check for updates',
+                elem_id='code-syntax-highlight_updateButton'
+            )
+
+# Inject JS scripts and modules
+def custom_js():
+    # JS to initialize the params for JS modules, we need to place this here because the params are loaded only after custom_js() is called
+    js_data_proxy_loader = f'''
+      document.getElementById('code-syntax-highlight').setAttribute('params', JSON.stringify({json.dumps(params)}));
+      document.getElementById('code-syntax-highlight').setAttribute('info', JSON.stringify({json.dumps(extension_info)}));
+    '''
+    return f'''
+      (function() {{{js_data_proxy_loader}}})();
+      (function() {{{js_update_check}}})();
+      (function() {{{js_modules}}})();
+    '''
+
+# Inject copy button CSS
+def custom_css():
+    return css_copy_button
