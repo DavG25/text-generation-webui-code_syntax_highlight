@@ -4,7 +4,7 @@ const dataProxy = document.getElementById('code-syntax-highlight');
 const extensionInfo = JSON.parse(dataProxy.getAttribute('info'));
 
 // Fetch remote manifest to compare versions
-const checkForUpdates = () => new Promise((resolve) => {
+const checkForUpdates = () => new Promise((resolve, reject) => {
   fetch(extensionInfo.manifestUrl, { cache: 'no-store' })
     .then((response) => response.json())
     .then((responseData) => {
@@ -16,45 +16,62 @@ const checkForUpdates = () => new Promise((resolve) => {
       //  0 = both local and remote versions are equal
       //  1 = there is a newer remote version
       // -1 = somehow our version is greater than the remote version
-      // This function is not optimal for every scenario, but in the case of the simple version scheme used by Code Syntax Highlight it works
+      // This function is not optimal for every scenario, but in the case of
+      // the simple version scheme used by Code Syntax Highlight it works
       const versionCompare = remoteVersion.localeCompare(localVersion, undefined, { numeric: true, sensitivity: 'base' });
 
-      const sameVersionMessage = `The current version of Code Syntax Highlight (${localVersion}) is already up-to-date`;
-      const newVersionMessage = 'A new version of Code Syntax Highlight is available'
-        + `\n\nCurrent version: ${localVersion}\nLatest version: ${remoteVersion}`
-        + '\n\nDo you want to open the GitHub page to download the latest version?';
-
       if (versionCompare === 0) {
-        // Local and remote versions are the same
-        alert(sameVersionMessage);
+        // Same version
+        resolve(false);
+      } else if (versionCompare === 1) {
+        // Newer version
+        resolve(true);
       } else {
-        // Remote version is newer
-        if (confirm(newVersionMessage) === true) {
-          window.open(`${extensionInfo.gitUrl}/releases/latest`, '_blank');
-        }
+        reject(new Error('INVALID_NEW_VERSION'));
       }
-      resolve(true);
     })
     .catch(() => {
-      // Show a default message when there is an error with fetch
-      const noConnectionMessage = 'Do you want to open the GitHub page of Code Syntax Highlight to check for the latest version?';
-      if (confirm(noConnectionMessage) === true) {
-        window.open(`${extensionInfo.gitUrl}/releases/latest`, '_blank');
-      }
-      resolve(false);
+      reject(new Error('FETCH_FAILED'));
     });
 });
 
-// Add click event to the HTML Gradio button to check for updates
+// Define text for each update button status
+const defaultText = 'Check for updates';
+const checkingText = 'Checking for updates, please wait';
+const newVersionText = 'Update available, click to open GitHub page';
+const upToDateText = 'Current version is already up-to-date';
+const errorText = 'Unable to check for updates, click to open GitHub page';
+
+// Add event to handle clicks on the HTML Gradio button
 updateButton.addEventListener('click', async (event) => {
-  // Disable button and update its text
   const button = event.target;
+
+  // Choose action based on button text
+  if (button.textContent === newVersionText || button.textContent === errorText) {
+    window.open(`${extensionInfo.gitUrl}/releases/latest`, '_blank');
+    // Only set button to its default text if it was previously in error state
+    if (button.textContent === errorText) button.textContent = defaultText;
+    return;
+  }
+
+  // Disable button and update its text while checking for updates
   button.disabled = true;
-  const oldTextContent = button.textContent;
-  button.textContent = 'Checking for updates, please wait';
+  button.textContent = checkingText;
   // Start checking for updates
-  await checkForUpdates();
-  // Enable button and set old text once update check finished
-  button.textContent = oldTextContent;
-  button.disabled = false;
+  await checkForUpdates()
+    .then(((newVersionFound) => {
+      if (newVersionFound === true) {
+        button.textContent = newVersionText;
+        button.disabled = false;
+      } else {
+        button.textContent = upToDateText;
+        setTimeout(() => {
+          button.textContent = defaultText;
+          button.disabled = false;
+        }, 5000);
+      }
+    })).catch(() => {
+      button.textContent = errorText;
+      button.disabled = false;
+    });
 });
