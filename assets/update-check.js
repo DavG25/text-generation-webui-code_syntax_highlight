@@ -5,7 +5,7 @@ const extensionInfo = JSON.parse(dataProxy.getAttribute('info'));
 
 // Fetch remote manifest to compare versions
 const checkForUpdates = () => new Promise((resolve, reject) => {
-  fetch(extensionInfo.manifestUrl, { cache: 'no-store' })
+  fetch(`${extensionInfo.manifestUrl}?nonce=${Date.now()}`, { cache: 'no-store' })
     .then((response) => response.json())
     .then((responseData) => {
       // Get version data for both remote and local manifest
