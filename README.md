@@ -1,6 +1,9 @@
 # Code Syntax Highlight
 ### An extension for [oobabooga's text-generation-webui](https://github.com/oobabooga/text-generation-webui/) to highlight code snippets
 
+> [!NOTE]
+> Versions of text-generation-webui released after the 26th of April 2024 support syntax highlighting of code snippets by default without needing this extension
+
 ![code_syntax_highlight_extension-oobabooga-text-generation-webui](https://www.davg25.com/file/github-media/text-generation-webui-code_syntax_highlight/demo2.png)
 
 ## Features
