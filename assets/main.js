@@ -118,7 +118,7 @@ function updateCopyButtonPluginStatus() {
   }
 }
 
-// Remove copy button associated with the provided code block element along with the no longer necessary wrapper class
+// Remove copy button associated with the provided code block element along with its wrapper class
 function removeCopyButtonFromCodeElement(codeElement) {
   const preWrapperElement = codeElement.parentElement;
   Array.from(preWrapperElement.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
@@ -126,7 +126,7 @@ function removeCopyButtonFromCodeElement(codeElement) {
     copyCodeButton.remove();
   });
 }
-// Remove every copy button from all code blocks along with the no longer necessary wrapper classes
+// Remove every copy button from all code blocks along with its wrapper classes
 function removeAllCopyButtons() {
   Array.from(document.querySelectorAll('button[class="hljs-copy-button"], button[class=""][data-copied="false"]')).forEach((copyCodeButton) => {
     copyCodeButton.parentElement.classList.remove('hljs-copy-wrapper');
