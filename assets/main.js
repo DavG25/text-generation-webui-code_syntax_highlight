@@ -29,60 +29,73 @@ function setTextGenerationStatus(newGeneratingStatus) {
 }
 
 /*
- * Detect the current status of text generation by intercepting WebSocket messages
- *
- * The average performance hit using this intercept method is about 1/10 of a
- * millisecond on a modern CPU and about half a millisecond on an older CPU,
- * even with larger WebSocket payloads the performance hit remains similar
- *
- * The performance hit refers to how much time this method adds to the total
- * time it takes to generate one token (in the context of text generation)
- *
- * For example when intercepting and parsing the message, the generation of a
- * single token takes 25.1 milliseconds, when we don't intercept and parse,
- * the same token generation takes 25.0 milliseconds
+ * Detect the current status of text generation by intercepting SSE (EventSource) or
+ * WebSocket messages: newer Gradio versions use server-sent events, while
+ * older ones use web sockets
  *
  * This is the logic behind how we detect the current status of text generation:
  *
- * (1) WebSocket received a message, we intercept it and parse it
+ * (1) EventSource/WebSocket received a message, we intercept it and parse it
  * (2) Is the message status either 'process_generating' or 'process_start'?
  *  -> If yes, we set the text generation status to 'true'
  *  -> If no, continue to (3)
  * (3) We wait a period of milliseconds defined in 'generationStatusChangeGracePeriod'
- * (4) Did we receive any new WebSocket messages while waiting?
+ * (4) Did we receive any new EventSource/WebSocket messages while waiting?
  *  -> If yes, go back to (1)
  *  -> If no, we set the text generation status to 'false'
  */
 let generationStatusChangeTimeout;
 const generationStatusChangeGracePeriod = 300;
+function setGeneratingStatusFromEventData(data) {
+  try {
+    const status = JSON.parse(data).msg;
+    // Ignore heartbeats
+    if (status === 'heartbeat') return;
+    // Check for current status
+    if (status === 'process_generating' || status === 'process_start') {
+      clearTimeout(generationStatusChangeTimeout);
+      setTextGenerationStatus(true);
+    } else {
+      clearTimeout(generationStatusChangeTimeout);
+      // Prevent messages in rapid succession overriding the status too quickly
+      generationStatusChangeTimeout = setTimeout(() => {
+        setTextGenerationStatus(false);
+      }, generationStatusChangeGracePeriod);
+    }
+  } catch (err) {
+    setTextGenerationStatus(false);
+  }
+}
+
+// Intercept EventSource messages (for newer Gradio versions)
+function interceptEventSource() {
+  // Save the original EventSource constructor
+  const OriginalEventSource = window.EventSource;
+
+  // Override the EventSource constructor
+  window.EventSource = function construct(url, options) {
+    const eventSource = new OriginalEventSource(url, options);
+    // Listen for incoming messages
+    eventSource.addEventListener('message', (event) => {
+      if (event?.data) setGeneratingStatusFromEventData(event.data);
+    });
+    // Return the original EventSource so other scripts can still use it
+    return eventSource;
+  };
+}
+// Intercept WebSocket messages (for older Gradio versions)
 function interceptWebSocket() {
-  // Find the WebSocket connection
+  // Save the original WebSocket constructor
   const OriginalWebSocket = window.WebSocket;
 
-  window.WebSocket = function construct(url, protocols) {
-    const ws = new OriginalWebSocket(url, protocols);
-
+  window.WebSocket = function construct(url, options) {
+    const webSocket = new OriginalWebSocket(url, options);
     // Listen for incoming messages
-    ws.addEventListener('message', (event) => {
-      try {
-        const status = JSON.parse(event.data).msg;
-        if (status === 'process_generating' || status === 'process_start') {
-          clearTimeout(generationStatusChangeTimeout);
-          setTextGenerationStatus(true);
-        } else {
-          clearTimeout(generationStatusChangeTimeout);
-          // Prevent WebSocket messages in rapid succession overriding the status too quickly
-          generationStatusChangeTimeout = setTimeout(() => {
-            setTextGenerationStatus(false);
-          }, generationStatusChangeGracePeriod);
-        }
-      } catch {
-        setTextGenerationStatus(false);
-      }
+    webSocket.addEventListener('message', (event) => {
+      if (event?.data) setGeneratingStatusFromEventData(event.data);
     });
-
     // Return the original WebSocket so other scripts can still use it
-    return ws;
+    return webSocket;
   };
 }
 
@@ -264,8 +277,9 @@ function setActivationStatus(isActive) {
   }
 }
 
-// Once everything is ready, activate the extension and start intercepting WebSocket messages
+// Once everything is ready, activate the extension and intercept EventSource/WebSocket messages
 setActivationStatus(params.activate);
+interceptEventSource();
 interceptWebSocket();
 
 // Update locally stored params
