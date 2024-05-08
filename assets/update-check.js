@@ -36,42 +36,44 @@ const checkForUpdates = () => new Promise((resolve, reject) => {
 });
 
 // Define text for each update button status
-const defaultText = 'Check for updates';
-const checkingText = 'Checking for updates, please wait';
-const newVersionText = 'Update available, click to open GitHub page';
-const upToDateText = 'Current version is already up-to-date';
-const errorText = 'Unable to check for updates, click to open GitHub page';
+const buttonText = {
+  default: 'Check for updates',
+  checkingUpdate: 'Checking for updates, please wait',
+  newVersion: 'Update available, click to open GitHub page',
+  upToDate: 'Current version is already up-to-date',
+  error: 'Unable to check for updates, click to open GitHub page',
+};
 
 // Add event to handle clicks on the HTML Gradio button
 updateButton.addEventListener('click', async (event) => {
   const button = event.target;
 
   // Choose action based on button text
-  if (button.textContent === newVersionText || button.textContent === errorText) {
+  if (button.textContent === buttonText.newVersion || button.textContent === buttonText.error) {
     window.open(`${extensionInfo.gitUrl}/releases/latest`, '_blank');
     // Only set button to its default text if it was previously in error state
-    if (button.textContent === errorText) button.textContent = defaultText;
+    if (button.textContent === buttonText.error) button.textContent = buttonText.default;
     return;
   }
 
   // Disable button and update its text while checking for updates
   button.disabled = true;
-  button.textContent = checkingText;
+  button.textContent = buttonText.checkingUpdate;
   // Start checking for updates
   await checkForUpdates()
     .then(((newVersionFound) => {
       if (newVersionFound === true) {
-        button.textContent = newVersionText;
+        button.textContent = buttonText.newVersion;
         button.disabled = false;
       } else {
-        button.textContent = upToDateText;
+        button.textContent = buttonText.upToDate;
         setTimeout(() => {
-          button.textContent = defaultText;
+          button.textContent = buttonText.default;
           button.disabled = false;
         }, 5000);
       }
     })).catch(() => {
-      button.textContent = errorText;
+      button.textContent = buttonText.error;
       button.disabled = false;
     });
 });
